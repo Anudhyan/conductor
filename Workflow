@@ -1,0 +1,35 @@
+# A custom task type that uses the Conductor REST API to start a workflow
+class ConductorWorkflowStarterTask(conductor.tasks.Task):
+    def __init__(self, workflow_name, workflow_input=None):
+        super().__init__()
+        self.workflow_name = workflow_name
+        self.workflow_input = workflow_input
+
+    def execute(self, context):
+        conductor_api = conductor.api.ConductorAPI()
+        workflow_def = conductor_api.get_workflow_definition(self.workflow_name)
+
+        # Start the workflow with the given input
+        conductor_api.start_workflow(workflow_def['name'], workflow_input=self.workflow_input)
+
+# A custom task type that uses the Conductor REST API to check the status of a workflow
+class ConductorWorkflowStatusCheckerTask(conductor.tasks.Task):
+    def __init__(self, workflow_id):
+        super().__init__()
+        self.workflow_id = workflow_id
+
+    def execute(self, context):
+        conductor_api = conductor.api.ConductorAPI()
+        workflow_status = conductor_api.get_workflow_status(self.workflow_id)
+
+        return workflow_status
+
+# A custom task type that uses the Conductor REST API to terminate a workflow
+class ConductorWorkflowTerminatorTask(conductor.tasks.Task):
+    def __init__(self, workflow_id):
+        super().__init__()
+        self.workflow_id = workflow_id
+
+    def execute(self, context):
+        conductor_api = conductor.api.ConductorAPI()
+        conductor_api.terminate_workflow(self.workflow_id)
